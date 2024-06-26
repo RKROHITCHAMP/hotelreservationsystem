@@ -58,11 +58,12 @@ public class Admin extends User {
             e.printStackTrace();
     }
 }
-    public void addRoom(String roomType) {
+    public void addRoom(String roomType, int price) {
         try (Connection conn = DatabaseConnection.getConnection()) {
-            String query = "INSERT INTO Rooms (room_type, is_reserved) VALUES (?, 'N')";
+            String query = "INSERT INTO Rooms (room_type, price) VALUES (?, ?)";
             PreparedStatement stmt = conn.prepareStatement(query);
             stmt.setString(1, roomType);
+            stmt.setInt(2, price);
             stmt.executeUpdate();
             System.out.println("Room added successfully.");
         } catch (SQLException e) {
@@ -78,10 +79,10 @@ public class Admin extends User {
             stmt.executeUpdate();
 
             // Optionally, set the room as not reserved
-            String updateRoomQuery = "UPDATE Rooms SET is_reserved = 'N' WHERE room_id = (SELECT room_id FROM Reservations WHERE reservation_id = ?)";
-            PreparedStatement updateStmt = conn.prepareStatement(updateRoomQuery);
-            updateStmt.setInt(1, reservationId);
-            updateStmt.executeUpdate();
+//            String updateRoomQuery = "UPDATE Rooms SET is_reserved = 'N' WHERE room_id = (SELECT room_id FROM Reservations WHERE reservation_id = ?)";
+//            PreparedStatement updateStmt = conn.prepareStatement(updateRoomQuery);
+//            updateStmt.setInt(1, reservationId);
+//            updateStmt.executeUpdate();
 
             System.out.println("Booking canceled successfully.");
         } catch (SQLException e) {
