@@ -57,6 +57,48 @@ public class NormalUser extends User {
         }
     }
 
+    public void viewAllRooms() {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            // Query to get all rooms
+            String query = "SELECT room_id, room_type, price FROM Rooms";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+
+            // Display all rooms
+            System.out.println("All Rooms:");
+            while (rs.next()) {
+                int roomId = rs.getInt("room_id");
+                String roomType = rs.getString("room_type");
+                int priceperday = rs.getInt("price");
+                System.out.println("Room ID: " + roomId + ", Room Type: " + roomType + ", Price per day: " + priceperday);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void checkReservationStatus(int reservationId) {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String query = "SELECT * FROM Reservations WHERE reservation_id = ?";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, reservationId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                System.out.println("Reservation ID: " + rs.getInt("reservation_id"));
+                System.out.println("User ID: " + rs.getInt("user_id"));
+                System.out.println("Room ID: " + rs.getInt("room_id"));
+                System.out.println("Check-in Date: " + rs.getDate("check_in_date"));
+                System.out.println("Check-out Date: " + rs.getDate("check_out_date"));
+                System.out.println("Status: " + rs.getString("status"));
+            } else {
+                System.out.println("No reservation found with the given ID.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public void checkin(int reservationId) {
         try (Connection conn = DatabaseConnection.getConnection()) {
             String query = "SELECT status FROM Reservations WHERE reservation_id = ?";
@@ -98,47 +140,6 @@ public class NormalUser extends User {
 
 
 
-    public void viewAllRooms() {
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            // Query to get all rooms
-            String query = "SELECT room_id, room_type, price FROM Rooms";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
-
-            // Display all rooms
-            System.out.println("All Rooms:");
-            while (rs.next()) {
-                int roomId = rs.getInt("room_id");
-                String roomType = rs.getString("room_type");
-                int priceperday = rs.getInt("price");
-                System.out.println("Room ID: " + roomId + ", Room Type: " + roomType + ", Price per day: " + priceperday);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void checkReservationStatus(int reservationId) {
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            String query = "SELECT * FROM Reservations WHERE reservation_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setInt(1, reservationId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                System.out.println("Reservation ID: " + rs.getInt("reservation_id"));
-                System.out.println("User ID: " + rs.getInt("user_id"));
-                System.out.println("Room ID: " + rs.getInt("room_id"));
-                System.out.println("Check-in Date: " + rs.getDate("check_in_date"));
-                System.out.println("Check-out Date: " + rs.getDate("check_out_date"));
-                System.out.println("Status: " + rs.getString("status"));
-            } else {
-                System.out.println("No reservation found with the given ID.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
- }
-}
-
     public void checkout(int reservationId) {
         try (Connection conn = DatabaseConnection.getConnection()) {
             // Retrieve reservation details
@@ -147,6 +148,7 @@ public class NormalUser extends User {
             reservationStmt.setInt(1, reservationId);
             ResultSet rs = reservationStmt.executeQuery();
             if (rs.next()) {
+
                 int roomId = rs.getInt("room_id");
                 Date checkInDate = rs.getDate("check_in_date");
                 Date checkOutDate = rs.getDate("check_out_date");
@@ -187,7 +189,29 @@ public class NormalUser extends User {
                     System.out.println("Room details not found.");
                 }
             } else {
-                System.out.println("No reservation found with the given ID or reservation is not accepted.");
+                String statusQuery = "SELECT status FROM Reservations WHERE reservation_id = ?";
+                PreparedStatement statusStmt = conn.prepareStatement(statusQuery);
+                statusStmt.setInt(1, reservationId);
+                ResultSet statusRs = statusStmt.executeQuery();
+                if (statusRs.next()) {
+                    String status = statusRs.getString("status");
+                     if (status.equals("accepted")){
+                        System.out.println("Your status is accepted but you have not checked in yet so please check in first to check out");
+                    }
+                    else if(status.equals("rejected")){
+                        System.out.println("Unfortunately your reservation has been rejected ");
+                    }
+                    else if(status.equals("checkedOut"))
+                    {
+                        System.out.println("Already checked out");
+                    }
+                    else if (status.equals("pending"))
+                    {
+                        System.out.println("Unfortunately your reservation has not been accepted yet please check your reservation status for status updation");
+                    }
+                } else {
+                    System.out.println("No reservation found with the given ID.");
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

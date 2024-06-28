@@ -33,6 +33,7 @@ public class Main {
                 } else if (choice == 3) {
                     System.out.print("Enter username: ");
                     String username = scanner.next();
+
                     System.out.print("Enter password: ");
                     String password = scanner.next();
 
@@ -66,7 +67,6 @@ public class Main {
                             System.out.print("Enter price of the room: ");
                             int price = scanner.nextInt();
                             admin.addRoom(roomType, price);
-
                             break;
                         case 3:
                             System.out.print("Enter reservation ID to cancel: ");

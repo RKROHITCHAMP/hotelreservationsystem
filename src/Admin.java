@@ -71,24 +71,30 @@ public class Admin extends User {
         }
     }
 
+
     public void cancelBooking(int reservationId) {
         try (Connection conn = DatabaseConnection.getConnection()) {
-            String query = "DELETE FROM Reservations WHERE reservation_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setInt(1, reservationId);
-            stmt.executeUpdate();
 
-            // Optionally, set the room as not reserved
-//            String updateRoomQuery = "UPDATE Rooms SET is_reserved = 'N' WHERE room_id = (SELECT room_id FROM Reservations WHERE reservation_id = ?)";
-//            PreparedStatement updateStmt = conn.prepareStatement(updateRoomQuery);
-//            updateStmt.setInt(1, reservationId);
-//            updateStmt.executeUpdate();
+            String checkQuery = "SELECT COUNT(*) FROM Reservations WHERE reservation_id = ?";
+            PreparedStatement checkStmt = conn.prepareStatement(checkQuery);
+            checkStmt.setInt(1, reservationId);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
 
-            System.out.println("Booking canceled successfully.");
+                String deleteQuery = "DELETE FROM Reservations WHERE reservation_id = ?";
+                PreparedStatement deleteStmt = conn.prepareStatement(deleteQuery);
+                deleteStmt.setInt(1, reservationId);
+                deleteStmt.executeUpdate();
+                System.out.println("Booking canceled successfully.");
+            } else {
+
+                System.out.println("The given reservation ID does not exist.");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
 
     @Override
     public void showMenu() {

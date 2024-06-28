@@ -27,8 +27,10 @@ public abstract class User {
                 int userId = rs.getInt("user_id");
                 String userType = rs.getString("user_type");
                 if (userType.equals("Admin")) {
+                    System.out.println("Login Successful");
                     return new Admin(userId, username, password);
                 } else {
+                    System.out.println("Login Successful");
                     return new NormalUser(userId, username, password);
                 }
             } else {
